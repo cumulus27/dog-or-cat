@@ -91,7 +91,7 @@ public class CameraFragment extends Fragment
     private boolean checkedPermissions = false;
     private TextView textView;
     private NumberPicker np;
-//    private ImageClassifier classifier;
+    private ImageClassifier classifier;
     private ListView deviceView;
     private ListView modelView;
 
@@ -359,71 +359,71 @@ public class CameraFragment extends Fragment
 
     @Override
     public void onDestroy() {
-//        if (classifier != null) {
-//            classifier.close();
-//        }
+        if (classifier != null) {
+            classifier.close();
+        }
         super.onDestroy();
     }
 
-//    private void updateActiveModel() {
-//        // Get UI information before delegating to background
-//        final int modelIndex = modelView.getCheckedItemPosition();
-//        final int deviceIndex = deviceView.getCheckedItemPosition();
-//        final int numThreads = np.getValue();
-//
-//        backgroundHandler.post(() -> {
-//            if (modelIndex == currentModel && deviceIndex == currentDevice
-//                    && numThreads == currentNumThreads) {
-//                return;
-//            }
-//            currentModel = modelIndex;
-//            currentDevice = deviceIndex;
-//            currentNumThreads = numThreads;
-//
-//            // Disable classifier while updating
-//            if (classifier != null) {
-//                classifier.close();
-//                classifier = null;
-//            }
-//
-//            // Lookup names of parameters.
-//            String model = modelStrings.get(modelIndex);
-//            String device = deviceStrings.get(deviceIndex);
-//
-//            Log.i(TAG, "Changing model to " + model + " device " + device);
-//
-//            // Try to load model.
-//            try {
-//                if (model.equals(mobilenetV1Quant)) {
-//                    classifier = new ImageClassifierQuantizedMobileNet(getActivity());
-//                } else if (model.equals(mobilenetV1Float)) {
-//                    classifier = new ImageClassifierFloatMobileNet(getActivity());
-//                } else {
-//                    showToast("Failed to load model");
-//                }
-//            } catch (IOException e) {
-//                Log.d(TAG, "Failed to load", e);
-//                classifier = null;
-//            }
-//
-//            // Customize the interpreter to the type of device we want to use.
-//            if (classifier == null) {
-//                return;
-//            }
-//            classifier.setNumThreads(numThreads);
-//            if (device.equals(cpu)) {
-//            } else if (device.equals(gpu)) {
-//                if (model.equals(mobilenetV1Quant)) {
-//                    showToast("gpu requires float model.");
-//                    classifier = null;
-//                } else {
-//                    classifier.useGpu();
-//                }
-//            } else if (device.equals(nnApi)) {
-//                classifier.useNNAPI();
-//            }
-//        });
-//    }
+    private void updateActiveModel() {
+        // Get UI information before delegating to background
+        final int modelIndex = modelView.getCheckedItemPosition();
+        final int deviceIndex = deviceView.getCheckedItemPosition();
+        final int numThreads = np.getValue();
+
+        backgroundHandler.post(() -> {
+            if (modelIndex == currentModel && deviceIndex == currentDevice
+                    && numThreads == currentNumThreads) {
+                return;
+            }
+            currentModel = modelIndex;
+            currentDevice = deviceIndex;
+            currentNumThreads = numThreads;
+
+            // Disable classifier while updating
+            if (classifier != null) {
+                classifier.close();
+                classifier = null;
+            }
+
+            // Lookup names of parameters.
+            String model = modelStrings.get(modelIndex);
+            String device = deviceStrings.get(deviceIndex);
+
+            Log.i(TAG, "Changing model to " + model + " device " + device);
+
+            // Try to load model.
+            try {
+                if (model.equals(mobilenetV1Quant)) {
+                    classifier = new ImageClassifierQuantizedMobileNet(getActivity());
+                } else if (model.equals(mobilenetV1Float)) {
+                    classifier = new ImageClassifierFloatMobileNet(getActivity());
+                } else {
+                    showToast("Failed to load model");
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "Failed to load", e);
+                classifier = null;
+            }
+
+            // Customize the interpreter to the type of device we want to use.
+            if (classifier == null) {
+                return;
+            }
+            classifier.setNumThreads(numThreads);
+            if (device.equals(cpu)) {
+            } else if (device.equals(gpu)) {
+                if (model.equals(mobilenetV1Quant)) {
+                    showToast("gpu requires float model.");
+                    classifier = null;
+                } else {
+                    classifier.useGpu();
+                }
+            } else if (device.equals(nnApi)) {
+                classifier.useNNAPI();
+            }
+        });
+    }
 
     /** Starts a background thread and its {@link Handler}. */
     private void startBackgroundThread() {
@@ -435,7 +435,7 @@ public class CameraFragment extends Fragment
             runClassifier = true;
         }
         backgroundHandler.post(periodicClassify);
-//        updateActiveModel();
+        updateActiveModel();
     }
 
     /** Takes photos and classify them periodically. */
@@ -445,7 +445,7 @@ public class CameraFragment extends Fragment
                 public void run() {
                     synchronized (lock) {
                         if (runClassifier) {
-//                            classifyFrame();
+                            classifyFrame();
                         }
                     }
                     backgroundHandler.post(periodicClassify);
@@ -453,19 +453,19 @@ public class CameraFragment extends Fragment
             };
 
     /** Classifies a frame from the preview stream. */
-//    private void classifyFrame() {
-//        if (classifier == null || getActivity() == null || cameraDevice == null) {
-//            // It's important to not call showToast every frame, or else the app will starve and
-//            // hang. updateActiveModel() already puts a error message up with showToast.
-//            // showToast("Uninitialized Classifier or invalid context.");
-//            return;
-//        }
-//        SpannableStringBuilder textToShow = new SpannableStringBuilder();
-//        Bitmap bitmap = textureView.getBitmap(classifier.getImageSizeX(), classifier.getImageSizeY());
-//        classifier.classifyFrame(bitmap, textToShow);
-//        bitmap.recycle();
-//        showToast(textToShow);
-//    }
+    private void classifyFrame() {
+        if (classifier == null || getActivity() == null || cameraDevice == null) {
+            // It's important to not call showToast every frame, or else the app will starve and
+            // hang. updateActiveModel() already puts a error message up with showToast.
+            // showToast("Uninitialized Classifier or invalid context.");
+            return;
+        }
+        SpannableStringBuilder textToShow = new SpannableStringBuilder();
+        Bitmap bitmap = textureView.getBitmap(classifier.getImageSizeX(), classifier.getImageSizeY());
+        classifier.classifyFrame(bitmap, textToShow);
+        bitmap.recycle();
+        showToast(textToShow);
+    }
 
     /** Stops the background thread and its {@link Handler}. */
     private void stopBackgroundThread() {
