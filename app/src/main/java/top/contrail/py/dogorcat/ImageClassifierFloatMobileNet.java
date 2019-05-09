@@ -43,12 +43,14 @@ public class ImageClassifierFloatMobileNet extends ImageClassifier {
     // you can download this file from
     // see build.gradle for where to obtain this file. It should be auto
     // downloaded into assets.
-    return "mobilenet_v1_1.0_224.tflite";
+    return "tflite_model_3.tflite";
+//    return "mobilenet_v1_1.0_224.tflite";
   }
 
   @Override
   protected String getLabelPath() {
-    return "labels_mobilenet_quant_v1_224.txt";
+    return "tflite_model_3_label.txt";
+//    return "labels_mobilenet_quant_v1_224.txt";
   }
 
   @Override
